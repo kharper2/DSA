@@ -1,0 +1,371 @@
+#Project by Kathryn Harper and Andrew Rosenberg
+class SinglyLinkedList:
+    class Node:
+
+        def __init__(self, item, next=None):
+            self.data = item
+            self.next = next
+
+    def __init__(self):
+        self.head = None
+        self.length = 0
+        self.tail = None
+
+    def __iter__(self):
+        p = self.head
+        while p is not None:
+            yield p.data
+            p = p.next
+
+    def __repr__(self):
+        return '[' + ', '.join(repr(n) for n in self) + ']'
+
+    def prepend(self, item):
+        n = SinglyLinkedList.Node(item, self.head)
+
+        if self.tail is None:
+            self.head = self.tail = n
+        else:
+            self.head = n
+
+        self.length += 1
+
+    def append(self, item):
+        if self.head is None:
+            self.prepend(item)
+        else:
+            n = SinglyLinkedList.Node(item)
+            self.tail.next = n
+            self.tail = n
+            self.length += 1
+
+    def delete_head(self):
+        assert self.length > 0
+        if self.length == 1:
+            self.head = self.tail = None
+            self.length = 0
+        else:
+            self.head = self.head.next
+            self.length -= 1
+
+
+class Queue:
+    # Please implement each of the following methods in class Queue following the guide.
+    # Here, I've only implemented the construction method and the dunder __repr__ method. Do not change them.
+    class Node:
+        # The Node class for a Singly LinkedList is implemented. Do not change anything in this class.
+
+        def __init__(self, val, next=None):
+            self.val = val
+            self.next = next
+
+        def __str__(self):
+            return str(self.val)
+
+        def __repr__(self):
+            return str(self)
+
+    def __init__(self):
+        # A new Queue contains two pointers head and tail both pointing to None.
+
+        ####################    DO NOT CHANGE THIS   ####################
+        self.head = self.tail = None
+
+    def empty(self):
+        # Return whether the Queue is empty or not.
+        return self.head is None
+
+    def enqueue(self, item):
+        # Enqueue item to the tail of the Queue.
+        # Note that, while enqueuing item to an empty Queue, both head and tail pointers need to be updated.
+        # Do not return anything in the method.
+        n = Queue.Node(item, None)
+        if (self.head is None):
+            self.head = n
+            self.tail = n
+        else:
+            self.tail.next = n
+            self.tail = n
+
+    def dequeue(self):
+        assert not self.empty()
+        # Dequeue the item at the head of the Queue.
+        # Note that, after dequeuing the last item, both head and tail pointers need to be updated.
+        # Return the dequeued item.
+        item = self.head
+        self.head = self.head.next
+        if self.head is None:
+            self.tail = None
+        return item.val
+
+    def __iter__(self):
+        # This implements "for item in Queue"
+        # Yield each node from head to tail.
+        # (We don't need to yield node.val since when implemented __repr__(Node) already.)
+        p = self.head
+        while (p is not None):
+            yield p
+            p = p.next
+
+    def __repr__(self):
+        # This method implements "print(Queue)"
+
+        ####################    DO NOT CHANGE THIS  ####################
+        return "[" + ",".join(repr(n) for n in self) + "]"
+
+
+class Vertex:
+    def __init__(self, status):
+        self.color = "WHITE"
+        self.d = 999999999999999999999999
+        self.pi = "NIL"
+        self.status = status
+        self.edges = SinglyLinkedList()
+
+    # def add_edge(self, possible_status):6
+    #     self.edges.append(possible_status)
+
+    def __repr__(self):
+        return str(self.status)
+
+    def get_status(self):
+        return self.status
+
+    def get_edges(self):
+        return self.edges
+
+    def add_edge(self, edge):
+        self.edges.append(edge)
+
+    def get_color(self):
+        return self.color
+
+    def get_d(self):
+        return self.d
+
+    def get_pi(self):
+        return self.pi
+
+    def set_color(self, color):
+        self.color = color
+
+    def set_d(self, d):
+        self.d = d
+
+    def set_pi(self, pi):
+        self.pi = pi
+
+    def set_edges(self, edges):
+        self.edges = edges
+
+class Graph:
+
+    def __init__(self, target, maxes):
+        self.vertices = {(0, 0, 0): Vertex((0, 0, 0))}
+        self.target = target
+        self.maxes = maxes
+
+    # def status(self, j1, j2, j3):
+    #     self.j1= j1
+    #     self.j2 = j2
+    #     self.j3 = j3
+    def get_vertex(self, status):
+        return self.vertices[status]
+
+    def get_vertices(self):
+        return self.vertices
+
+    def __contains__(self, status):
+        return status in self.vertices
+
+    # FIX SPELLING
+
+    def add_vertices(self, status):
+
+        f1 = Vertex((int(self.maxes[0]), int(status[1]), int(status[2])))
+        if f1.get_status() not in self.vertices[status].get_edges() and not f1.get_status() == status:
+            self.vertices[status].add_edge(f1.get_status())
+        if f1.get_status() not in self.vertices:
+            self.vertices[f1.get_status()] = f1
+            self.add_vertices(f1.get_status())
+
+        f2 = Vertex((int(status[0]), int(self.maxes[1]), int(status[2])))
+        if f2.get_status() not in self.vertices[status].get_edges() and not f2.get_status() == status:
+            self.vertices[status].add_edge(f2.get_status())
+        if f2.get_status() not in self.vertices:
+            self.vertices[f2.get_status()] = f2
+            self.add_vertices(f2.get_status())
+
+        f3 = Vertex((int(status[0]), int(status[1]), int(self.maxes[2])))
+        if f3.get_status() not in self.vertices[status].get_edges() and not f3.get_status() == status:
+            self.vertices[status].add_edge(f3.get_status())
+        if f3.get_status() not in self.vertices:
+            self.vertices[f3.get_status()] = f3
+            self.add_vertices(f3.get_status())
+
+        # empty
+        e1 = Vertex((0, int(status[1]), int(status[2])))
+        if e1.get_status() not in self.vertices[status].get_edges() and not e1.get_status() == status:
+            self.vertices[status].add_edge(e1.get_status())
+        if e1.get_status() not in self.vertices:
+            self.vertices[e1.get_status()] = e1
+            self.add_vertices(e1.get_status())
+
+        e2 = Vertex((int(status[0]), 0, int(status[2])))
+        if e2.get_status() not in self.vertices[status].get_edges() and not e2.get_status() == status:
+            self.vertices[status].add_edge(e2.get_status())
+        if e2.get_status() not in self.vertices:
+            self.vertices[e2.get_status()] = e2
+            self.add_vertices(e2.get_status())
+
+        e3 = Vertex((int(status[0]), int(status[1]), 0))
+        if e3.get_status() not in self.vertices[status].get_edges() and not e3.get_status() == status:
+            self.vertices[status].add_edge(e3.get_status())
+        if e3.get_status() not in self.vertices:
+            self.vertices[e3.get_status()] = e3
+            self.add_vertices(e3.get_status())
+
+        self.transfer(status)
+
+    def transfer(self, status):
+        into1 = int(status[0])
+        outof1 = int(status[1])
+        if into1 + outof1 <= int(self.maxes[0]):
+            into1 += outof1
+            outof1 = 0
+        else:
+            # print("GREATER THAN")
+            difference1 = int(self.maxes[0]) - into1  # INTO 1
+            into1 += difference1
+            outof1 -= difference1
+        t1 = Vertex((into1, outof1, int(status[2])))
+        if t1.get_status() not in self.vertices[status].get_edges() and not t1.get_status() == status:
+            self.vertices[status].add_edge(t1.get_status())
+        if t1.get_status() not in self.vertices:
+            self.vertices[t1.get_status()] = t1
+            self.add_vertices(t1.get_status())
+
+        into2 = int(status[1])
+        outof2 = int(status[0])
+        if into2 + outof2 <= int(self.maxes[1]):
+            into2 += outof2
+            outof2 = 0
+        else:
+            difference2 = int(self.maxes[1]) - into2
+            into2 += difference2
+            outof2 -= difference2
+        t2 = Vertex((outof2, into2, int(status[2])))
+        if t2.get_status() not in self.vertices[status].get_edges() and not t2.get_status() == status:
+            self.vertices[status].add_edge(t2.get_status())
+        if t2.get_status() not in self.vertices:
+            self.vertices[t2.get_status()] = t2
+            self.add_vertices(t2.get_status())
+
+        into3 = int(status[0])
+        outof3 = int(status[2])
+        if into3 + outof3 <= int(self.maxes[0]):
+            into3 += outof3
+            outof3 = 0
+        else:
+            difference3 = int(self.maxes[0]) - into3
+            into3 += difference3
+            outof3 -= difference3
+        t3 = Vertex((into3, int(status[1]), outof3))
+        if t3.get_status() not in self.vertices[status].get_edges() and not t3.get_status() == status:
+            self.vertices[status].add_edge(t3.get_status())
+        if t3.get_status() not in self.vertices:
+            self.vertices[t3.get_status()] = t3
+            self.add_vertices(t3.get_status())
+
+#SOMETHING WITH FOUR IS WRONG!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        into4 = int(status[2])
+        outof4 = int(status[0])
+        if into4 + outof4 <= int(self.maxes[2]):
+            into4 += outof4
+            outof4 = 0
+        else:
+            difference4 = int(self.maxes[2]) - into4
+            into4 += difference4
+            outof4 -= difference4
+        t4 = Vertex((outof4, int(status[1]), into4))
+        if t4.get_status() not in self.vertices[status].get_edges() and not t4.get_status() == status:
+            self.vertices[status].add_edge(t4.get_status())
+        if t4.get_status() not in self.vertices:
+            self.vertices[t4.get_status()] = t4
+            self.add_vertices(t4.get_status())
+
+        into5 = int(status[1])
+        outof5 = int(status[2])
+        if into5 + outof5 <= int(self.maxes[1]):
+            into5 += outof5
+            outof5 = 0
+        else:
+            difference5 = int(self.maxes[1]) - into5
+            into5 += difference5
+            outof5 -= difference5
+        t5 = Vertex((int(status[0]), into5, outof5))
+        if t5.get_status() not in self.vertices[status].get_edges() and not t5.get_status() == status:
+            self.vertices[status].add_edge(t5.get_status())
+        if t5.get_status() not in self.vertices:
+            self.vertices[t5.get_status()] = t5
+            self.add_vertices(t5.get_status())
+
+        into6 = int(status[2])
+        outof6 = int(status[1])
+        if into6 + outof6 <= int(self.maxes[2]):
+            into6 += outof6
+            outof6 = 0
+        else:
+            difference6 = int(self.maxes[2]) - into6
+            into6 += difference6
+            outof6 -= difference6
+        t6 = Vertex((int(status[0]), outof6, into6))
+        if t6.get_status() not in self.vertices[status].get_edges() and not t6.get_status() == status:
+            self.vertices[status].add_edge(t6.get_status())
+        if t6.get_status() not in self.vertices:
+            self.vertices[t6.get_status()] = t6
+            self.add_vertices(t6.get_status())
+
+
+def bfs(g, s):
+    s.set_color("GRAY")
+    s.set_d(0)
+    q1 = Queue()
+    q1.enqueue(s)
+    flag = True
+    while not q1.empty() and flag:  # CHECK THIS!
+        u = q1.dequeue()
+        if int(u.get_status()[0]) == int(g.target) or int(u.get_status()[1]) == int(g.target) or int(
+                u.get_status()[2]) == int(g.target):  # We found it
+            flag = False
+            result = []
+            while u.get_status() != (0, 0, 0):
+                result.append(u.get_status())
+                u = u.get_pi()
+            result.append((0, 0, 0))
+            result.reverse()
+            print(">>>>> Shortest Path <<<<<")
+            return result
+        for v in u.get_edges():
+            if g.get_vertices()[v].get_color() == "WHITE":
+                g.get_vertices()[v].set_color("GRAY")
+                g.get_vertices()[v].set_d(u.get_d() + 1)
+                g.get_vertices()[v].set_pi(u)
+                q1.enqueue(g.get_vertices()[v])
+        u.set_color("BLACK")
+
+    return "No Path Found!"
+
+print("For all the following questions please enter numbers in the range 1-9 inclusive")
+jar1 = input("Enter the size of Jar 1: ")
+jar2 = input("Enter the size of Jar 2: ")
+jar3 = input("Enter the size of Jar 3: ")
+target = input("Enter a target: ")
+maxes = (jar1, jar2, jar3)
+graph = Graph(target, maxes)
+initial = Vertex((0, 0, 0))
+graph.add_vertices(initial.get_status())
+initial.set_edges(graph.get_vertices()[(0, 0, 0)].get_edges())
+output = bfs(graph, initial)
+print(output)
